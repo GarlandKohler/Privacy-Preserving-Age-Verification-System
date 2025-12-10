@@ -2,6 +2,10 @@
 
 A comprehensive, production-ready solution for privacy-preserving age verification using Fully Homomorphic Encryption (FHE) on blockchain. This system demonstrates advanced cryptographic techniques for verifying age without revealing personal information.
 
+[Privacy-Preserving Age Verification System.mp4](https://streamable.com/055anj)
+
+[Demo](https://privacy-preserving-age-verification.vercel.app/)
+
 ## Overview
 
 This project provides a complete implementation of a privacy-preserving age verification system, featuring:
