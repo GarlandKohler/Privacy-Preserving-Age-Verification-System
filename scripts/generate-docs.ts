@@ -23,6 +23,7 @@ interface ContractEvent {
 }
 
 const CONTRACTS = [
+    // Core Examples
     {
         name: "PrivateAgeVerification",
         description: "Core age verification contract using FHE",
@@ -47,6 +48,67 @@ const CONTRACTS = [
         name: "AuditedVerification",
         description: "Age verification with complete audit trail",
         file: "contracts/AuditedVerification.sol",
+    },
+    // Basic FHE Examples
+    {
+        name: "FHECounter",
+        description: "A simple FHE counter demonstrating basic operations",
+        file: "contracts/basic/FHECounter.sol",
+    },
+    {
+        name: "EncryptSingleValue",
+        description: "Demonstrates how to encrypt and store a single value",
+        file: "contracts/basic/EncryptSingleValue.sol",
+    },
+    {
+        name: "EncryptMultipleValues",
+        description: "Demonstrates encryption and management of multiple values",
+        file: "contracts/basic/EncryptMultipleValues.sol",
+    },
+    {
+        name: "UserDecryptSingleValue",
+        description: "Demonstrates user-side decryption of encrypted values",
+        file: "contracts/basic/UserDecryptSingleValue.sol",
+    },
+    {
+        name: "AccessControlExample",
+        description: "Demonstrates FHE access control using allowThis and allow",
+        file: "contracts/basic/AccessControlExample.sol",
+    },
+    {
+        name: "FHEArithmetic",
+        description: "Demonstrates arithmetic operations on encrypted values",
+        file: "contracts/basic/FHEArithmetic.sol",
+    },
+    {
+        name: "FHEComparison",
+        description: "Demonstrates comparison operations on encrypted values",
+        file: "contracts/basic/FHEComparison.sol",
+    },
+    {
+        name: "InputProofExample",
+        description: "Demonstrates input proofs and their importance",
+        file: "contracts/basic/InputProofExample.sol",
+    },
+    {
+        name: "PublicDecryptSingleValue",
+        description: "Demonstrates public decryption of a single encrypted value",
+        file: "contracts/basic/PublicDecryptSingleValue.sol",
+    },
+    {
+        name: "PublicDecryptMultipleValues",
+        description: "Demonstrates public decryption of multiple encrypted values",
+        file: "contracts/basic/PublicDecryptMultipleValues.sol",
+    },
+    {
+        name: "UnderstandingHandles",
+        description: "Educational contract explaining FHE handles and their lifecycle",
+        file: "contracts/basic/UnderstandingHandles.sol",
+    },
+    {
+        name: "AntiPatterns",
+        description: "Common mistakes in FHE development with correct approaches",
+        file: "contracts/basic/AntiPatterns.sol",
     },
 ];
 
@@ -208,12 +270,32 @@ function generateAllDocs(): void {
     // Generate SUMMARY for GitBook
     let summary = `# Summary\n\n`;
     summary += `* [Introduction](../README.md)\n`;
+    summary += `* [Examples Overview](../EXAMPLES_OVERVIEW.md)\n`;
+    summary += `* [Basic Examples Guide](BASIC_EXAMPLES.md)\n`;
     summary += `* [API Reference](INDEX.md)\n\n`;
-    summary += `## Contracts\n\n`;
+    summary += `## Core Examples\n\n`;
 
-    CONTRACTS.forEach((contract) => {
+    // Core examples
+    const coreExamples = CONTRACTS.slice(0, 5);
+    coreExamples.forEach((contract) => {
         summary += `* [${contract.name}](${contract.name}.md)\n`;
     });
+
+    summary += `\n## Basic FHE Examples\n\n`;
+
+    // Basic examples
+    const basicExamples = CONTRACTS.slice(5);
+    basicExamples.forEach((contract) => {
+        summary += `* [${contract.name}](${contract.name}.md)\n`;
+    });
+
+    summary += `\n## Documentation\n\n`;
+    summary += `* [Quick Start](../QUICKSTART.md)\n`;
+    summary += `* [Development Guide](../DEVELOPMENT_GUIDE.md)\n`;
+    summary += `* [Maintenance Guide](../MAINTENANCE_GUIDE.md)\n`;
+    summary += `* [Architecture](../ARCHITECTURE.md)\n`;
+    summary += `* [Technical Specifications](../TECHNICAL_SPECIFICATIONS.md)\n`;
+    summary += `* [FAQ & Best Practices](../FAQ_AND_BEST_PRACTICES.md)\n`;
 
     fs.writeFileSync(path.join(docsDir, "SUMMARY.md"), summary);
     console.log(`✅ Generated: SUMMARY.md`);

@@ -54,6 +54,34 @@ const EXAMPLES_MAP: { [key: string]: ExampleConfig } = {
         test: "AuditedVerification.test.ts",
         keywords: ["audit-trail", "logging"],
     },
+    "public-decrypt-single-value": {
+        name: "Public Decrypt Single Value",
+        description: "Demonstrates public decryption of a single encrypted value",
+        contract: "basic/PublicDecryptSingleValue.sol",
+        test: "PublicDecryptSingleValue.test.ts",
+        keywords: ["public-decryption", "commit-reveal"],
+    },
+    "public-decrypt-multiple-values": {
+        name: "Public Decrypt Multiple Values",
+        description: "Demonstrates public decryption of multiple encrypted values",
+        contract: "basic/PublicDecryptMultipleValues.sol",
+        test: "PublicDecryptMultipleValues.test.ts",
+        keywords: ["public-decryption", "multi-value"],
+    },
+    "understanding-handles": {
+        name: "Understanding Handles",
+        description: "Educational contract explaining FHE handles and their lifecycle",
+        contract: "basic/UnderstandingHandles.sol",
+        test: "UnderstandingHandles.test.ts",
+        keywords: ["handles", "symbolic-execution"],
+    },
+    "anti-patterns": {
+        name: "Anti-Patterns",
+        description: "Common mistakes in FHE development with correct approaches",
+        contract: "basic/AntiPatterns.sol",
+        test: "AntiPatterns.test.ts",
+        keywords: ["anti-patterns", "best-practices", "education"],
+    },
 };
 
 function createExample(exampleName: string, outputDir: string): void {

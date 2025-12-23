@@ -59,14 +59,16 @@ contract PrivateAgeVerification is SepoliaConfig {
         totalVerifications = 0;
     }
 
-    // 用户提交加密年龄
+    /// @notice User submits encrypted age for verification
+    /// @param _age The age to be encrypted and verified (must be between 1-120)
+    /// @dev Encrypts the age using FHE and performs age comparison against adult threshold
     function submitEncryptedAge(uint8 _age) external onlyValidAge(_age) {
         require(!userVerifications[msg.sender].isVerified, "Already verified");
 
-        // 加密年龄数据
+        // Encrypt age data using FHE
         euint8 encryptedAge = FHE.asEuint8(_age);
 
-        // 使用FHE进行隐私年龄比较
+        // Perform privacy-preserving age comparison using FHE
         ebool isAdult = FHE.ge(encryptedAge, FHE.asEuint8(ADULT_AGE_THRESHOLD));
 
         userVerifications[msg.sender] = AgeVerification({
@@ -77,7 +79,7 @@ contract PrivateAgeVerification is SepoliaConfig {
             verificationCompleted: false
         });
 
-        // 设置访问控制权限
+        // Set access control permissions for encrypted values
         FHE.allowThis(encryptedAge);
         FHE.allowThis(isAdult);
         FHE.allow(encryptedAge, msg.sender);
@@ -88,7 +90,9 @@ contract PrivateAgeVerification is SepoliaConfig {
         emit AgeSubmitted(msg.sender, block.timestamp);
     }
 
-    // 请求年龄验证结果 - 简化版本，返回加密的验证结果
+    /// @notice Get verification result for the caller
+    /// @return ebool Encrypted boolean indicating if user is an adult
+    /// @dev Returns encrypted result to maintain privacy
     function getVerificationResult() external view returns (ebool) {
         require(userVerifications[msg.sender].isVerified, "Age not submitted");
 
@@ -96,14 +100,16 @@ contract PrivateAgeVerification is SepoliaConfig {
         return verification.isAdult;
     }
 
-    // 管理员可以为用户完成验证（用于演示目的）
+    /// @notice Admin completes verification for a user (for demonstration purposes)
+    /// @param user The address of the user whose verification is being completed
+    /// @param isAdult Whether the user is an adult
     function completeVerificationForUser(address user, bool isAdult) external onlyAuthorizedVerifier {
         require(userVerifications[user].isVerified, "User age not submitted");
         require(!userVerifications[user].verificationCompleted, "Verification already completed");
 
         userVerifications[user].verificationCompleted = true;
 
-        // 记录验证历史
+        // Record verification in history
         verificationHistory.push(VerificationResult({
             user: user,
             isAdult: isAdult,
@@ -114,14 +120,17 @@ contract PrivateAgeVerification is SepoliaConfig {
         emit VerificationCompleted(user, isAdult, block.timestamp);
     }
 
-    // 检查用户是否为成年人（仅返回公开结果）
+    /// @notice Check if a user is an adult (returns public result only)
+    /// @param user The address to check
+    /// @return completed Whether verification has been completed
+    /// @return isAdult Whether the user is an adult (only valid if completed is true)
     function isUserAdult(address user) external view returns (bool completed, bool isAdult) {
         AgeVerification storage verification = userVerifications[user];
         if (!verification.verificationCompleted) {
             return (false, false);
         }
 
-        // 查找历史记录中的结果
+        // Search history for the result
         for (uint i = verificationHistory.length; i > 0; i--) {
             if (verificationHistory[i-1].user == user) {
                 return (true, verificationHistory[i-1].isAdult);
@@ -131,14 +140,17 @@ contract PrivateAgeVerification is SepoliaConfig {
         return (false, false);
     }
 
-    // 验证年龄范围（高级功能）
+    /// @notice Verify if age falls within a specific range (advanced feature)
+    /// @param minAge Minimum age of the range
+    /// @param maxAge Maximum age of the range
+    /// @return ebool Encrypted boolean indicating if age is within range
     function verifyAgeRange(uint8 minAge, uint8 maxAge) external returns (ebool) {
         require(userVerifications[msg.sender].isVerified, "Age not submitted");
         require(minAge <= maxAge, "Invalid age range");
 
         AgeVerification storage verification = userVerifications[msg.sender];
 
-        // 检查年龄是否在指定范围内
+        // Check if age is within specified range
         euint8 minAgeEncrypted = FHE.asEuint8(minAge);
         euint8 maxAgeEncrypted = FHE.asEuint8(maxAge);
 
@@ -148,7 +160,9 @@ contract PrivateAgeVerification is SepoliaConfig {
         return FHE.and(ageAboveMin, ageBelowMax);
     }
 
-    // 比较两个用户年龄（不泄露具体年龄）
+    /// @notice Compare ages between two users (without revealing actual ages)
+    /// @param otherUser The address of the other user to compare with
+    /// @return ebool Encrypted boolean indicating if caller is older than otherUser
     function compareAges(address otherUser) external returns (ebool) {
         require(userVerifications[msg.sender].isVerified, "Your age not submitted");
         require(userVerifications[otherUser].isVerified, "Other user age not submitted");
@@ -156,25 +170,31 @@ contract PrivateAgeVerification is SepoliaConfig {
         AgeVerification storage myVerification = userVerifications[msg.sender];
         AgeVerification storage otherVerification = userVerifications[otherUser];
 
-        // 返回当前用户是否比另一用户年龄大
+        // Return whether current user is older than the other user
         return FHE.gt(myVerification.encryptedAge, otherVerification.encryptedAge);
     }
 
-    // 添加授权验证者
+    /// @notice Add an authorized verifier
+    /// @param verifier The address to authorize as a verifier
     function addAuthorizedVerifier(address verifier) external onlyOwner {
         require(verifier != address(0), "Invalid verifier address");
         authorizedVerifiers[verifier] = true;
         emit VerifierAdded(verifier);
     }
 
-    // 移除授权验证者
+    /// @notice Remove an authorized verifier
+    /// @param verifier The address to remove from authorized verifiers
     function removeAuthorizedVerifier(address verifier) external onlyOwner {
         require(verifier != owner, "Cannot remove owner");
         authorizedVerifiers[verifier] = false;
         emit VerifierRemoved(verifier);
     }
 
-    // 获取用户验证状态
+    /// @notice Get user verification status
+    /// @param user The address to check
+    /// @return hasSubmittedAge Whether the user has submitted their age
+    /// @return verificationCompleted Whether verification has been completed
+    /// @return timestamp When the age was submitted
     function getUserVerificationStatus(address user) external view returns (
         bool hasSubmittedAge,
         bool verificationCompleted,
@@ -188,7 +208,10 @@ contract PrivateAgeVerification is SepoliaConfig {
         );
     }
 
-    // 获取验证统计信息
+    /// @notice Get verification statistics
+    /// @return totalUsers Total number of verifications
+    /// @return completedVerifications Number of completed verifications
+    /// @return pendingCount Number of pending verifications
     function getVerificationStats() external view returns (
         uint256 totalUsers,
         uint256 completedVerifications,
@@ -202,7 +225,10 @@ contract PrivateAgeVerification is SepoliaConfig {
         );
     }
 
-    // 获取验证历史记录
+    /// @notice Get verification history (authorized verifiers only)
+    /// @param startIndex Starting index in the history array
+    /// @param count Number of records to retrieve
+    /// @return Array of verification results
     function getVerificationHistory(uint256 startIndex, uint256 count)
         external
         view
@@ -224,17 +250,20 @@ contract PrivateAgeVerification is SepoliaConfig {
         return results;
     }
 
-    // 重置用户验证状态（仅限所有者）
+    /// @notice Reset user verification status (owner only)
+    /// @param user The address whose verification status to reset
     function resetUserVerification(address user) external onlyOwner {
         delete userVerifications[user];
     }
 
-    // 检查是否为授权验证者
+    /// @notice Check if an address is an authorized verifier
+    /// @param verifier The address to check
+    /// @return bool Whether the address is authorized
     function isAuthorizedVerifier(address verifier) external view returns (bool) {
         return authorizedVerifiers[verifier];
     }
 
-    // 紧急暂停功能
+    /// @notice Emergency pause status
     bool public emergencyPaused = false;
 
     modifier whenNotPaused() {

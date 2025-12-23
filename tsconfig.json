@@ -20,7 +20,7 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["hardhat/console", "chai", "mocha"],
+    "types": ["node", "hardhat/console", "chai", "mocha"],
     "typeRoots": ["./node_modules/@types"]
   },
   "include": [
